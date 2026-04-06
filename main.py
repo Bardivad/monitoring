@@ -57,6 +57,7 @@ try:
     )
 
     analyza = response.content[0].text
+    analyza = analyza.replace("```html", "").replace("```", "").strip()
     print("✅ Claude má hotovo!")
 
     # --- FÁZE 3: VYTVOŘENÍ WEBU ---
