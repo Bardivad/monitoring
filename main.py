@@ -20,7 +20,7 @@ if not hledane_vyrazy:
 
 run_input = {
     "searchTerms": hledane_vyrazy, 
-    "maxItems": 5, # Pořád testujeme jen na 5 kusech
+    "maxItems": 10, # Pořád testujeme jen na 5 kusech
     "proxyConfig": { "useApifyProxy": True }
 }
 
