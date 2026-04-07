@@ -1,9 +1,11 @@
 import os
+import json
+from datetime import datetime
 from dotenv import load_dotenv
 from apify_client import ApifyClient
-import anthropic # Tohle je ten náš nový mozek
+import anthropic
 
-# 1. Načtení klíčů (Ujisti se, že máš v .env i ANTHROPIC_API_KEY)
+# 1. Načtení klíčů
 load_dotenv()
 APIFY_TOKEN = os.getenv("APIFY_TOKEN")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
@@ -20,7 +22,7 @@ if not hledane_vyrazy:
 
 run_input = {
     "searchTerms": hledane_vyrazy, 
-    "maxItems": 10, # Pořád testujeme jen na 5 kusech
+    "maxItems": 10,
     "proxyConfig": { "useApifyProxy": True }
 }
 
@@ -42,14 +44,12 @@ try:
     # --- FÁZE 2: ANALÝZA (CLAUDE) ---
     print("🧠 Předávám data Claudovi k analýze...")
     
-    # 1. Načteme šablonu promptu z textáku
     with open("prompt.txt", "r", encoding="utf-8") as f:
         sablona_promptu = f.read()
         
-    # 2. Pomocí .format() vložíme naše ulovené tweety přesně tam, kde je v textáku značka {data}
     prompt = sablona_promptu.format(data=vsechny_tweety)
 
-    # Voláme Anthropic API
+    # Voláme Anthropic API (s opraveným modelem!)
     response = claude_client.messages.create(
         model="claude-haiku-4-5",
         max_tokens=1000,
@@ -60,36 +60,35 @@ try:
     analyza = analyza.replace("```html", "").replace("```", "").strip()
     print("✅ Claude má hotovo!")
 
-    # --- FÁZE 3: VYTVOŘENÍ WEBU ---
-    print("🌐 Generuji HTML soubor...")
+    # --- FÁZE 3: UKLÁDÁNÍ DO JSON DATABÁZE ---
+    print("💾 Ukládám svodku do databáze...")
     
-    # Jednoduchá šablona pro tvůj GitHub web
-    html_obsah = f"""
-    <!DOCTYPE html>
-    <html lang="cs">
-    <head>
-        <meta charset="UTF-8">
-        <title>Monitoring UA - Svodka</title>
-        <style>
-            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; line-height: 1.6; color: #333; }}
-            h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
-            .analyza {{ background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 5px solid #3498db; }}
-        </style>
-    </head>
-    <body>
-        <h1>Vojenský monitoring: Rychlá svodka</h1>
-        <div class="analyza">
-            {analyza.replace(chr(10), '<br>')}
-        </div>
-        <p><small>Vygenerováno automaticky pomocí Apify a Claude AI.</small></p>
-    </body>
-    </html>
-    """
+    # Zjistíme dnešní datum pro databázi i pro hezký titulek
+    dnesni_datum = datetime.now().strftime("%Y-%m-%d")
+    hezke_datum = datetime.now().strftime("%d. %m. %Y")
+    
+    # Vytvoříme slovník pro dnešní záznam
+    novy_zaznam = {
+        "datum": dnesni_datum,
+        "titulek": f"Svodka {hezke_datum}",
+        "obsah": analyza
+    }
 
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_obsah)
+    # Zkusíme otevřít existující databázi. Když ještě neexistuje, začneme s prázdným seznamem.
+    if os.path.exists("databaze.json"):
+        with open("databaze.json", "r", encoding="utf-8") as f:
+            databaze = json.load(f)
+    else:
+        databaze = []
 
-    print("🎉 Všechno je hotovo! Otevři si soubor index.html ve svém prohlížeči.")
+    # Vložíme dnešní záznam hned na první místo (index 0), ať máme nejnovější zprávy vždy nahoře
+    databaze.insert(0, novy_zaznam)
+
+    # Uložíme přepsanou databázi zpět do souboru
+    with open("databaze.json", "w", encoding="utf-8") as f:
+        json.dump(databaze, f, ensure_ascii=False, indent=2)
+
+    print("🎉 Databáze úspěšně aktualizována! Podívej se na soubor databaze.json.")
 
 except Exception as e:
     print(f"❌ Sakra, někde to ruplo: {e}")

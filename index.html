@@ -1,21 +1,92 @@
-
-    <!DOCTYPE html>
-    <html lang="cs">
-    <head>
-        <meta charset="UTF-8">
-        <title>Monitoring UA - Svodka</title>
-        <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; line-height: 1.6; color: #333; }
-            h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-            .analyza { background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 5px solid #3498db; }
-        </style>
-    </head>
-    <body>
-        <h1>Vojenský monitoring: Rychlá svodka</h1>
-        <div class="analyza">
-            <h2>Situační přehled z monitoringu</h2><br><br><h3>Vojenská situace na frontě</h3><br><ul><br><li><strong>Kostiantynivka:</strong> Dostupné video dokumentující situaci v tomto ukrajinském městě</li><br><li><strong>Ruský postup:</strong> Přestože se situace zhoršila, Rusko za poslední dva měsíce neposunulo svou linii o moc dál, přední linie zůstává relativně stabilní navzdory vážným problémům</li><br><li><strong>Logistické problémy:</strong> Ruským jednotkám Vampire se stále více ztěžuje dodávka zásob na pozice pěchoty</li><br><li><strong>Zdravotnická evakuace:</strong> Zdravotnická evakuace jednotek (CASEVAC) pomocí bezpilotních prostředků je v některých směrech extrémně náročná a může vyžadovat 7-8 pokusů. Zaznamenány případy, kdy vojáci nosili turnikety více než měsíc</li><br></ul><br><br><h3>Ztráty ruské strany</h3><br><ul><br><li><strong>Letecká katastrofa v Krymu:</strong> Vojenský transportní letoun se zřítil v rusky kontrolovaném Krymu, při neštěstí zahynulo 30 osob včetně seniora ruských vzdušných sil Alexandra Otroščenka, velitele 45. armády</li><br></ul><br><br><h3>Ekonomické aspekty</h3><br><ul><br><li><strong>Ruská ropná renta:</strong> Moskva si drží vysoké zisky z války, Brent ropa se obchoduje nad 100 USD za barel</li><br><li><strong>Ukrajinské údery na export:</strong> Ukrajina provádí útoky na ruské exportní terminály v Baltském moři (Primorsk a Ust-Luga) – pět útoků za poslední týden může výrazně snížit Kremlinovy zisky z obchodu</li><br></ul>
-        </div>
-        <p><small>Vygenerováno automaticky pomocí Apify a Claude AI.</small></p>
-    </body>
-    </html>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring UA - Archiv Svodky</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; line-height: 1.6; color: #333; padding: 0 20px; }
+        
+        /* Nadpis teď funguje i jako kontejner pro naši roletku s datumy */
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        
+        /* Stylování roletky, ať nevypadá jak z Windows 95 */
+        select { padding: 8px 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; background-color: #fff; font-family: inherit; }
+        select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); }
+        
+        .analyza { background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 5px solid #3498db; margin-top: 20px; }
+        .loader { font-style: italic; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <h1>
+        Vojenský monitoring
+        <select id="vyber-svodky">
+            <option value="">Načítám archiv...</option>
+        </select>
+    </h1>
     
+    <div id="obsah-svodky" class="analyza">
+        <p class="loader">Hledám nejnovější zprávy z fronty...</p>
+    </div>
+    
+    <p><small>Vygenerováno automaticky pomocí Apify a Claude AI. Data se načítají z JSON archivu.</small></p>
+
+    <script>
+        // Tady začíná ta pravá programátorská magie
+        let databaze = [];
+
+        // Sáhneme si pro náš nový JSON soubor
+        fetch('databaze.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Kruci, nemůžu najít databaze.json. Je soubor opravdu na serveru?");
+                }
+                return response.json();
+            })
+            .then(data => {
+                databaze = data;
+                const selectElement = document.getElementById('vyber-svodky');
+                selectElement.innerHTML = ''; // Vymažeme původní text "Načítám archiv..."
+
+                // Pojistka, kdyby databáze byla úplně prázdná
+                if (databaze.length === 0) {
+                    selectElement.innerHTML = '<option>Zatím žádné svodky</option>';
+                    document.getElementById('obsah-svodky').innerHTML = '<p>Zatím tu nic není. Skript asi ještě nedoběhl.</p>';
+                    return;
+                }
+
+                // Projdeme JSON záznam po záznamu a naplníme tu roletku nahoře
+                databaze.forEach((zaznam, index) => {
+                    const option = document.createElement('option');
+                    option.value = index; // Index 0 je nejnovější, 1 je starší atd.
+                    option.textContent = zaznam.titulek;
+                    selectElement.appendChild(option);
+                });
+
+                // Hned po načtení stránky tam rovnou střelíme tu první (nejnovější) svodku
+                zobrazSvodku(0);
+
+                // Když uživatel v roletce vybere jiné datum, zavoláme funkci na přepsání textu
+                selectElement.addEventListener('change', (e) => {
+                    zobrazSvodku(e.target.value);
+                });
+            })
+            .catch(error => {
+                // Tohle na tebe přesně vyskočí, když to otevřeš jen u sebe na PC v prohlížeči
+                document.getElementById('obsah-svodky').innerHTML = `
+                    <p style="color: #e74c3c;"><strong>Chyba při načítání:</strong> ${error.message}</p>
+                    <p><em>Poznámka: Pokud tohle otevíráš jen z disku u sebe v PC, prohlížeč z bezpečnostních důvodů (CORS) blokuje načítání jiných souborů. Musíš to odeslat na GitHub a otevřít tu veřejnou webovou adresu!</em></p>`;
+            });
+
+        // Funkce, která vezme text z konkrétního šuplíčku v databázi a plácne ho do stránky
+        function zobrazSvodku(index) {
+            const svodka = databaze[index];
+            const kontejner = document.getElementById('obsah-svodky');
+            
+            // Nahradíme případné znaky nového řádku za HTML tagy <br>, aby to nebyl jeden slitej text
+            kontejner.innerHTML = svodka.obsah.replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>
