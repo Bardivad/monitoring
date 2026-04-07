@@ -1,5 +1,6 @@
 from:RALee85
 from:TheStudyofWar
+from:AndrewPerpetua
 # klidně si sem pak můžeš přidat další pod sebe, třeba:
-# from:DefenceHQ
+# from:DefenceHQ claude-haiku-4-5
 # #UkraineWar

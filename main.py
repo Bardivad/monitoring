@@ -1,6 +1,6 @@
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from apify_client import ApifyClient
 import anthropic
@@ -13,20 +13,30 @@ ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 client = ApifyClient(APIFY_TOKEN)
 claude_client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
+# 2. Kouzlo s časem - zjistíme, kolikátého bylo přesně před 24 hodinami
+vcera = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+# 3. Načtení a úprava cílů
+hledane_vyrazy = []
 with open("cile.txt", "r", encoding="utf-8") as f:
-    hledane_vyrazy = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+    for line in f:
+        cisty_text = line.strip()
+        if cisty_text and not cisty_text.startswith("#"):
+            # Automaticky přilepíme filtr za posledních 24 hodin
+            hledane_vyrazy.append(f"{cisty_text} since:{vcera}")
 
 if not hledane_vyrazy:
     print("❌ ZASTAVENO: Nenačetl jsem žádná slova! Zkontroluj soubor cile.txt.")
     exit()
 
+# Záchranná brzda nastavena na 150 položek celkem
 run_input = {
     "searchTerms": hledane_vyrazy, 
-    "maxItems": 10,
+    "maxItems": 150, 
     "proxyConfig": { "useApifyProxy": True }
 }
 
-print("🚀 Startuju Apify scraper...")
+print(f"🚀 Startuju Apify scraper (hledám zprávy od: {vcera})...")
 
 try:
     # --- FÁZE 1: ZÍSKÁNÍ DAT ---
