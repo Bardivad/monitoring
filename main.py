@@ -91,8 +91,15 @@ try:
     else:
         databaze = []
 
-    # Vložíme dnešní záznam hned na první místo (index 0), ať máme nejnovější zprávy vždy nahoře
-    databaze.insert(0, novy_zaznam)
+    # Zkontrolujeme, jestli už svodka se stejným datem v databázi neexistuje
+    existujici_index = next((index for (index, d) in enumerate(databaze) if d["datum"] == dnesni_datum), None)
+
+    if existujici_index is not None:
+        # Pokud ano, prostě tu starou dnešní přepíšeme tou novou, čerstvější
+        databaze[existujici_index] = novy_zaznam
+    else:
+        # Pokud ne (je to opravdu nový den), vložíme ji na první místo nahoru
+        databaze.insert(0, novy_zaznam)
 
     # Uložíme přepsanou databázi zpět do souboru
     with open("databaze.json", "w", encoding="utf-8") as f:
