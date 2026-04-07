@@ -62,7 +62,7 @@ try:
     # Voláme Anthropic API (s opraveným modelem!)
     response = claude_client.messages.create(
         model="claude-haiku-4-5",
-        max_tokens=1000,
+        max_tokens=3000,
         messages=[{"role": "user", "content": prompt}]
     )
 
