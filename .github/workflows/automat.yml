@@ -11,27 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 📥 Stáhnout kód z repozitáře
-      uses: actions/checkout@v4
+      - name: 📥 Stáhnout kód z repozitáře
+        uses: actions/checkout@v4
 
-    - name: 🐍 Nastavit Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: 🐍 Nastavit Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: 📦 Nainstalovat knihovny
-      run: |
-        python -m pip install --upgrade pip
-        pip install apify-client anthropic python-dotenv
+      - name: 📦 Nainstalovat knihovny
+        run: |
+          python -m pip install --upgrade pip
+          pip install apify-client anthropic python-dotenv
 
-    - name: 🚀 Spustit sběr dat a analýzu
-      env:
-        # Tady si robot sáhne pro tvoje zamčené klíče
-        APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      run: python main.py
+      - name: 🚀 Spustit sběr dat a analýzu
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python main.py
 
-   - name: 📥 Uložit a nahrát novou stránku na web
+      - name: 💾 Uložit a nahrát novou databázi na web
         run: |
           git config --global user.name "GitHub Robot"
           git config --global user.email "actions@github.com"
