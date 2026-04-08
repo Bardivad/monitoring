@@ -7,5 +7,20 @@ Zaměř se ABSOLUTNĚ VÝHRADNĚ na konflikt na Ukrajině, dění v Rusku a na u
 DŮLEŽITÉ: Svoji odpověď formátuj ROVNOU JAKO ČISTÉ HTML (použij tagy jako <h2>, <p>, <ul>, <li>, <strong>). 
 Nepoužívej formátování Markdown (žádné křížky # nebo hvězdičky *) a nepiš na začátek žádné označení kódového bloku.
 
+Na úplný začátek svého výstupu (hned pod hlavní nadpis) vlož zhodnocení denní vojenské aktivity obou stran. Analyzuj úroveň aktivity (VYSOKÁ, STŘEDNÍ, NÍZKÁ) a hlavní typ činnosti zvlášť pro Ukrajinu a zvlášť pro Rusko.
+
+Použij přesně tento HTML formát a nahraď text v hranatých závorkách svými zjištěními:
+
+<div style="margin-bottom: 20px;">
+   <div style="padding: 10px; margin-bottom: 5px; background-color: #e3f2fd; border-left: 5px solid #0d6efd; color: #052c65;">
+      <strong>🇺🇦 Aktivita Ukrajiny: [VYSOKÁ / STŘEDNÍ / NÍZKÁ]</strong> – [Jedna výstižná věta shrnující hlavní ukrajinskou činnost daného dne]
+   </div>
+   <div style="padding: 10px; background-color: #f8d7da; border-left: 5px solid #dc3545; color: #58151c;">
+      <strong>🇷🇺 Aktivita Ruska: [VYSOKÁ / STŘEDNÍ / NÍZKÁ]</strong> – [Jedna výstižná věta shrnující hlavní ruskou činnost daného dne]
+   </div>
+</div>
+
+Pokud v datech chybí informace pro jednu nebo obě strany, místo úrovně aktivity napiš "NEDOSTATEK DAT" a do věty stručně uveď, že zprávy z tohoto dne danou stranu nezmiňují. Toto hodnocení musí být ve výstupu absolutně vždy!
+
 Tady jsou zdrojová data:
 {data}
