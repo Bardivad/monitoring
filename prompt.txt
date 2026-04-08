@@ -4,10 +4,13 @@ Tvým úkolem je vytvořit z nich stručné a čtivé shrnutí v češtině.
 DŮLEŽITÉ PRAVIDLO FILTRACE:
 Zaměř se ABSOLUTNĚ VÝHRADNĚ na konflikt na Ukrajině, dění v Rusku a na události, které mají na tento konflikt přímý vliv (např. západní vojenská pomoc, sankce, nebo naopak zbrojní dodávky z Íránu či Číny). Jakékoliv jiné zprávy ze světa (např. lokální spory na Blízkém východě, asijská politika atd.), které s ukrajinskou frontou nesouvisí, bez milosti zahoď a vůbec je do svodky nezařazuj.
 
+DŮLEŽITÉ PRAVIDLO PRO ČEŠTINU:
+Piš přirozenou, profesionální a čtivou novinářskou češtinou. Zcela se vyhni anglicismům a otrockým překladům z anglických tweetů (např. místo "manpower" použij "živá síla/personál", místo "deadlock" napiš "patová situace", místo "ceasefire" použij "příměří" atd.). Text musí znít, jako by ho napsal rodilý český mluvčí.
+
 DŮLEŽITÉ: Svoji odpověď formátuj ROVNOU JAKO ČISTÉ HTML (použij tagy jako <h2>, <p>, <ul>, <li>, <strong>). 
 Nepoužívej formátování Markdown (žádné křížky # nebo hvězdičky *) a nepiš na začátek žádné označení kódového bloku.
 
-Na úplný začátek svého výstupu (hned pod hlavní nadpis) vlož zhodnocení denní vojenské aktivity obou stran. Analyzuj úroveň aktivity (VYSOKÁ, STŘEDNÍ, NÍZKÁ) a hlavní typ činnosti zvlášť pro Ukrajinu a zvlášť pro Rusko.
+Na úplný konec svého výstupu (jako absolutně poslední věc v textu) vlož zhodnocení denní vojenské aktivity obou stran. Analyzuj úroveň aktivity (VYSOKÁ, STŘEDNÍ, NÍZKÁ) a hlavní typ činnosti zvlášť pro Ukrajinu a zvlášť pro Rusko.
 
 Použij přesně tento HTML formát a nahraď text v hranatých závorkách svými zjištěními:
 
