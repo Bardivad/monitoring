@@ -31,10 +31,10 @@ jobs:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       run: python main.py
 
-    - name: 📤 Uložit a nahrát novou stránku na web
-      run: |
-        git config --global user.name "GitHub Robot"
-        git config --global user.email "actions@github.com"
-        git add index.html
-        git diff --quiet && git diff --staged --quiet || git commit -m "🤖 Automatická aktualizace svodky"
-        git push
+   - name: 📥 Uložit a nahrát novou stránku na web
+        run: |
+          git config --global user.name "GitHub Robot"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "🤖 Automatická aktualizace databáze svodky" || echo "Žádné změny k uložení - databáze je aktuální"
+          git push
