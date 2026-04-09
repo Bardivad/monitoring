@@ -1,99 +1,58 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring UA - Archiv Svodky</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 40px auto; line-height: 1.6; color: #333; padding: 0 20px; }
-        
-        /* Nadpis teď funguje i jako kontejner pro naši roletku s datumy */
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        
-        /* Stylování roletky, ať nevypadá jak z Windows 95 */
-        select { padding: 8px 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; background-color: #fff; font-family: inherit; }
-        select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); }
-        
-        .analyza { background: #f9f9f9; padding: 20px; border-radius: 8px; border-left: 5px solid #3498db; margin-top: 20px; }
-        .loader { font-style: italic; color: #7f8c8d; }
-        
-        /* Zmenšení mezer pro kompaktnější text svodky */
-        .analyza h2 { margin-top: 25px; margin-bottom: 10px; font-size: 1.4em; }
-        .analyza h3 { margin-top: 15px; margin-bottom: 5px; font-size: 1.2em; }
-        .analyza p { margin-top: 0; margin-bottom: 10px; }
-        .analyza ul { margin-top: 0; margin-bottom: 15px; }
-        .analyza li { margin-bottom: 5px; }
-    </style>
-</head>
-<body>
-    <h1>
-        Vojenský monitoring
-        <select id="vyber-svodky">
-            <option value="">Načítám archiv...</option>
-        </select>
-    </h1>
+<style>
+    /* Základní čistý font a vycentrování */
+    body { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        max-width: 800px; 
+        margin: 20px auto; /* Zmenšený horní okraj */
+        line-height: 1.5; 
+        color: #2c3e50; 
+        padding: 0 15px; 
+    }
+
+    /* Nadpis a roletka vedle sebe, bez ošklivé čáry */
+    h1 { 
+        color: #1a252f; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        font-size: 1.8em;
+        margin-bottom: 20px; /* Zmenšená mezera pod hlavičkou */
+        border-bottom: none; /* Odstraněna čára pod nadpisem */
+    }
+
+    /* Minimalistická roletka s jemným stínem */
+    select { 
+        padding: 6px 12px; 
+        font-size: 14px; 
+        border-radius: 6px; 
+        border: 1px solid #e2e8f0; 
+        cursor: pointer; 
+        background-color: #f8fafc; 
+        font-family: inherit; 
+        color: #475569;
+        transition: all 0.2s ease;
+    }
+    select:hover { background-color: #f1f5f9; border-color: #cbd5e1; }
+    select:focus { outline: none; border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2); }
+
+    /* Hlavní kontejner svodky - žádné zbytečné okraje */
+    .analyza { 
+        background: #ffffff; 
+        padding: 0; /* Zrušen vnitřní polštář */
+        margin-top: 10px; 
+    }
+    .loader { font-style: italic; color: #94a3b8; }
+
+    /* Kompaktní texty přímo od Clauda */
+    .analyza h2 { margin-top: 20px; margin-bottom: 8px; font-size: 1.3em; color: #1e293b; }
+    .analyza h3 { margin-top: 15px; margin-bottom: 6px; font-size: 1.1em; color: #334155; }
+    .analyza p { margin-top: 0; margin-bottom: 8px; font-size: 0.95em; }
     
-    <div id="obsah-svodky" class="analyza">
-        <p class="loader">Hledám nejnovější zprávy z fronty...</p>
-    </div>
-    
-    <p><small>Vygenerováno automaticky pomocí Apify a Claude AI. Data se načítají z JSON archivu.</small></p>
+    /* Elegantní a sražené seznamy (odrážky) */
+    .analyza ul { margin-top: 0; margin-bottom: 12px; padding-left: 20px; }
+    .analyza li { margin-bottom: 4px; font-size: 0.95em; }
+    .analyza li::marker { color: #94a3b8; } /* Šedé odrážky pro jemnější vzhled */
 
-    <script>
-        // Tady začíná ta pravá programátorská magie
-        let databaze = [];
-
-        // Sáhneme si pro náš nový JSON soubor
-        fetch('databaze.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Kruci, nemůžu najít databaze.json. Je soubor opravdu na serveru?");
-                }
-                return response.json();
-            })
-            .then(data => {
-                databaze = data;
-                const selectElement = document.getElementById('vyber-svodky');
-                selectElement.innerHTML = ''; // Vymažeme původní text "Načítám archiv..."
-
-                // Pojistka, kdyby databáze byla úplně prázdná
-                if (databaze.length === 0) {
-                    selectElement.innerHTML = '<option>Zatím žádné svodky</option>';
-                    document.getElementById('obsah-svodky').innerHTML = '<p>Zatím tu nic není. Skript asi ještě nedoběhl.</p>';
-                    return;
-                }
-
-                // Projdeme JSON záznam po záznamu a naplníme tu roletku nahoře
-                databaze.forEach((zaznam, index) => {
-                    const option = document.createElement('option');
-                    option.value = index; // Index 0 je nejnovější, 1 je starší atd.
-                    option.textContent = zaznam.titulek;
-                    selectElement.appendChild(option);
-                });
-
-                // Hned po načtení stránky tam rovnou střelíme tu první (nejnovější) svodku
-                zobrazSvodku(0);
-
-                // Když uživatel v roletce vybere jiné datum, zavoláme funkci na přepsání textu
-                selectElement.addEventListener('change', (e) => {
-                    zobrazSvodku(e.target.value);
-                });
-            })
-            .catch(error => {
-                // Tohle na tebe přesně vyskočí, když to otevřeš jen u sebe na PC v prohlížeči
-                document.getElementById('obsah-svodky').innerHTML = `
-                    <p style="color: #e74c3c;"><strong>Chyba při načítání:</strong> ${error.message}</p>
-                    <p><em>Poznámka: Pokud tohle otevíráš jen z disku u sebe v PC, prohlížeč z bezpečnostních důvodů (CORS) blokuje načítání jiných souborů. Musíš to odeslat na GitHub a otevřít tu veřejnou webovou adresu!</em></p>`;
-            });
-
-        // Funkce, která vezme text z konkrétního šuplíčku v databázi a plácne ho do stránky
-        function zobrazSvodku(index) {
-            const svodka = databaze[index];
-            const kontejner = document.getElementById('obsah-svodky');
-            
-            // Nahradíme případné znaky nového řádku za HTML tagy <br>, aby to nebyl jeden slitej text
-            kontejner.innerHTML = svodka.obsah.replace(/\n/g, '<br>');
-        }
-    </script>
-</body>
-</html>
+    /* Patička úplně dole */
+    .paticka { margin-top: 30px; font-size: 0.8em; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+</style>
