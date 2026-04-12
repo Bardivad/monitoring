@@ -15,6 +15,8 @@ claude_client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
 
 # 2. Kouzlo s časem - zjistíme, kolikátého bylo přesně před 24 hodinami
 vcera = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+dnesni_datum = datetime.now().strftime("%Y-%m-%d")
+hezke_datum = datetime.now().strftime("%d. %m. %Y")
 
 # 3. Načtení a úprava cílů
 hledane_vyrazy = []
@@ -48,8 +50,16 @@ try:
     vsechny_tweety = ""
     for tweet in dataset_items:
         text = tweet.get("fullText", "")
-        if text:
-            vsechny_tweety += f"- {text}\n"
+        if text and not text.startswith("RT @"):
+            autor = tweet.get("author", {}).get("userName", "neznámý")
+            vsechny_tweety += f"- [{autor}] {text}\n"
+
+    if not vsechny_tweety.strip():
+        print("⚠️ Apify nevrátil žádné relevantní tweety. Svodka se nevygeneruje.")
+        exit()
+
+    pocet_tweetu = vsechny_tweety.count("\n")
+    print(f"📊 Načteno tweetů ke zpracování: {pocet_tweetu}")
 
     # --- FÁZE 2: ANALÝZA (CLAUDE) ---
     print("🧠 Předávám data Claudovi k analýze...")
@@ -57,7 +67,7 @@ try:
     with open("prompt.txt", "r", encoding="utf-8") as f:
         sablona_promptu = f.read()
         
-    prompt = sablona_promptu.format(data=vsechny_tweety)
+    prompt = sablona_promptu.format(data=vsechny_tweety, datum=dnesni_datum)
 
     # Voláme Anthropic API (s opraveným modelem!)
     response = claude_client.messages.create(
@@ -72,11 +82,7 @@ try:
 
     # --- FÁZE 3: UKLÁDÁNÍ DO JSON DATABÁZE ---
     print("💾 Ukládám svodku do databáze...")
-    
-    # Zjistíme dnešní datum pro databázi i pro hezký titulek
-    dnesni_datum = datetime.now().strftime("%Y-%m-%d")
-    hezke_datum = datetime.now().strftime("%d. %m. %Y")
-    
+
     # Vytvoříme slovník pro dnešní záznam
     novy_zaznam = {
         "datum": dnesni_datum,
@@ -108,4 +114,6 @@ try:
     print("🎉 Databáze úspěšně aktualizována! Podívej se na soubor databaze.json.")
 
 except Exception as e:
+    import traceback
     print(f"❌ Sakra, někde to ruplo: {e}")
+    traceback.print_exc()
