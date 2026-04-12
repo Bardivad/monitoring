@@ -3,6 +3,7 @@ from:TheStudyofWar
 from:AndrewPerpetua
 from:WarMonitor3
 from:NOELreports
+from:rybar_en
 # klidně si sem pak můžeš přidat další pod sebe, třeba:
 # from:DefenceHQ
 # #UkraineWar
